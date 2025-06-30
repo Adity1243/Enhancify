@@ -50,7 +50,7 @@ terminate() {
     killall -9 wget &> /dev/null
     killall -9 aria2c &> /dev/null
     clear
-    echo "Script terminated !!"
+    notify msg "Script terminated !!"
     exit 1
 }
 trap terminate SIGTERM SIGINT SIGABRT
@@ -124,7 +124,7 @@ installDependencies() {
     CTR=0
     while [ ! -e "$AAPT2" ]; do
         [ $CTR -gt 2 ] && return 1
-        echo -e "\nDownloading aapt2...\n"
+        notify msg "Downloading aapt2..."
         readarray -t RESPONSE < <(curl -s "https://api.github.com/repos/decipher3114/binaries/releases/latest" | jq -r --arg ARCH "$(getprop ro.product.cpu.abi)" '.assets[] | if (.name | test($ARCH)) then (.browser_download_url, .size) else empty end' 2> /dev/null)
         [ "${#RESPONSE[@]}" -eq 0 ] && return 1
         if download_with_aria2 "${RESPONSE[0]}" "$AAPT2" "Downloading aapt2..."; then
@@ -133,11 +133,11 @@ installDependencies() {
                 break
             else
                 rm -f "$AAPT2"
-                echo "Downloaded file size mismatch. Retrying..."
+                notify msg "Downloaded file size mismatch. Retrying..."
             fi
         else
             rm -f "$AAPT2"
-            echo "Download failed. Retrying..."
+            notify msg "Download failed. Retrying..."
         fi
         ((CTR++))
     done
@@ -145,7 +145,7 @@ installDependencies() {
     CTR=0
     while [ ! -e "$APK_EDITOR" ]; do
         [ $CTR -gt 2 ] && return 1
-        echo -e "\nDownloading APKEditor...\n"
+        notify msg "Downloading APKEditor..."
         readarray -t RESPONSE < <(curl -s "https://api.github.com/repos/REAndroid/APKEditor/releases/latest" | jq -r '.assets[0] | .browser_download_url, .size' 2> /dev/null)
         [ "${#RESPONSE[@]}" -eq 0 ] && return 1
         if download_with_aria2 "${RESPONSE[0]}" "$APK_EDITOR" "Downloading APKEditor..."; then
@@ -153,11 +153,11 @@ installDependencies() {
                 break
             else
                 rm -f "$APK_EDITOR"
-                echo "Downloaded file size mismatch. Retrying..."
+                notify msg "Downloaded file size mismatch. Retrying..."
             fi
         else
             rm -f "$APK_EDITOR"
-            echo "Download failed. Retrying..."
+            notify msg "Download failed. Retrying..."
         fi
         # Switch JDK versions on failure
         yes | pkg uninstall -y openjdk-21
@@ -175,7 +175,7 @@ fetchSrc() {
 
     ping -c 1 google.com &> /dev/null || return
 
-    echo "Checking Latest Release..."
+    notify info "Checking Latest Release..."
 
     # Get release information including body (changelog)
     RELEASE_INFO=$(curl -s 'https://api.github.com/repos/Adity1243/Enhancify/releases/latest')
@@ -233,7 +233,7 @@ fetchSrc() {
 clear
 
 if ! installDependencies; then
-    echo -e "Dependencies not installed !!\nRun again with stable internet connection."
+    notify msg "Dependencies not installed !!\nRun again with stable internet connection."
     exit 1
 fi
 
