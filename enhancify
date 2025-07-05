@@ -61,7 +61,19 @@ installDependencies() {
     [ -e "$HOME/storage" ] || termux-setup-storage
 
     BINS=$(ls "$PREFIX/bin")
-    grep -q java <<< "$BINS" || PKGS+=("openjdk-21")
+    
+    # Java version handling - prefer openjdk-21, fallback to openjdk-17
+    if ! grep -q java <<< "$BINS"; then
+        echo "Installing Java..."
+        if pkg install openjdk-21 -y &>/dev/null; then
+            echo "Using openjdk-21"
+        else
+            echo "openjdk-21 not available, falling back to openjdk-17"
+            pkg install openjdk-17 -y || return 1
+        fi
+    fi
+    
+    # Other dependencies
     grep -q wget <<< "$BINS" || PKGS+=("wget")
     grep -q tput <<< "$BINS" || PKGS+=("ncurses-utils")
     grep -q dialog <<< "$BINS" || PKGS+=("dialog")
@@ -107,8 +119,6 @@ installDependencies() {
             break
         else
             rm "$APK_EDITOR"
-            yes | pkg uninstall -y openjdk-21
-            yes | pkg install openjdk-17
         fi
         ((CTR++))
     done
@@ -144,9 +154,12 @@ fetchSrc() {
         rm -rf Enhancify-* &> /dev/null
         cp -f "$SRC/enhancify" "$PREFIX/bin/enhancify"
         chmod +x "$PREFIX/bin/enhancify"
-        echo -e "Enhancify $TAG is now installed.\nRun 'enhancify -h' for help."
+        
+        # Auto-launch after installation
+        echo -e "\nEnhancify $TAG installed successfully. Launching in 2 seconds..."
         sleep 2
         enhancify
+        exit
     else
         echo -e "Unable to install Enhancify $TAG !!\nPlease try again with proper Internet"
         exit 1
