@@ -1,0 +1,54 @@
+name: Release Automation
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Extract release notes
+        id: extract-notes
+        run: |
+          TAG="${{ github.ref_name }}"
+          # Find changelog section for the current tag
+          SECTION=$(awk -v tag="$TAG" '
+          BEGIN { found=0; output="" }
+          {
+            if ($0 ~ "## \\[" tag "\\]") {
+              found=1
+              next
+            }
+            if (found && /^### /) {
+              found=0
+              next
+            }
+            if (found) {
+              output = output $0 "\n"
+            }
+          }
+          END { printf "%s", output }
+          ' CHANGELOG.md)
+          
+          # Format for GitHub output
+          SECTION="${SECTION//'%'/'%25'}"
+          SECTION="${SECTION//$'\n'/'%0A'}"
+          SECTION="${SECTION//$'\r'/'%0D'}"
+          echo "notes=$SECTION" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.ref }}
+          name: ${{ github.ref_name }}
+          body: |
+            ${{ steps.extract-notes.outputs.notes }}
+            
+            **Full Changelog**: https://github.com/${{ github.repository }}/compare/${GITHUB_REF#refs/tags/}...${{ github.ref_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
