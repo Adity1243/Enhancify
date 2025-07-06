@@ -48,7 +48,6 @@ done
 terminate() {
     killall -9 curl &> /dev/null
     killall -9 wget &> /dev/null
-    killall -9 aria2c &> /dev/null
     clear
     echo "Script terminated !!"
     exit 1
@@ -66,7 +65,7 @@ installDependencies() {
     # Java version handling - prefer openjdk-21, fallback to openjdk-17
     if ! grep -q java <<< "$BINS"; then
         echo "Installing Java..."
-        if pkg install openjdk-21 -y; then
+        if pkg install openjdk-21 -y ; then
             echo "Using openjdk-21"
         else
             echo "openjdk-21 not available, falling back to openjdk-17"
@@ -84,8 +83,8 @@ installDependencies() {
     grep -q aria2c <<< "$BINS" || PKGS+=("aria2")
 
     if [ "${#PKGS[@]}" -ne 0 ]; then
-        pkg update -y || return 1
-        pkg install -y "${PKGS[@]}" || return 1
+        pkg update || return 1
+        yes | pkg install "${PKGS[@]}" || return 1
     fi
 
     sed -i '/allow-external-apps/s/# //' "$HOME/.termux/termux.properties"
@@ -95,34 +94,17 @@ installDependencies() {
     AAPT2="$SRC/bin/aapt2"
     APK_EDITOR="$SRC/bin/APKEditor.jar"
 
-    # Aria2c configuration for faster downloads
-    ARIA_OPTS=(
-        "--max-connection-per-server=3"
-        "--min-split-size=2M"
-        "--split=3"
-        "--file-allocation=none"
-        "--summary-interval=1"
-    )
-
     CTR=0 && while [ ! -e "$AAPT2" ]; do
         [ $CTR -gt 2 ] && return 1
         echo -e "\nDownloading aapt2...\n"
         readarray -t RESPONSE < <(curl -s "https://api.github.com/repos/decipher3114/binaries/releases/latest" | jq -r --arg ARCH "$(getprop ro.product.cpu.abi)" '.assets[] | if (.name | test($ARCH)) then (.browser_download_url, .size) else empty end' 2> /dev/null)
         [ "${#RESPONSE[@]}" -eq 0 ] && return 1
-        
-        if command -v aria2c &> /dev/null; then
-            echo "Using aria2c for faster download"
-            aria2c "${ARIA_OPTS[@]}" -d "$(dirname "$AAPT2")" -o "$(basename "$AAPT2")" "${RESPONSE[0]}"
-        else
-            echo "Using wget (aria2c not available)"
-            wget -q --show-progress "${RESPONSE[0]}" -O "$AAPT2"
-        fi
-        
+        wget -q --show-progress "${RESPONSE[0]}" -O "$AAPT2"
         chmod +x "$AAPT2"
         if [ "${RESPONSE[1]}" == "$(stat -c %s "$AAPT2" 2> /dev/null)" ]; then
             break
         else
-            rm -f "$AAPT2"
+            rm "$AAPT2"
         fi
         ((CTR++))
     done
@@ -130,21 +112,13 @@ installDependencies() {
     CTR=0 && while [ ! -e "$APK_EDITOR" ]; do
         [ $CTR -gt 2 ] && return 1
         echo -e "\nDownloading APKEditor...\n"
-        readarray -t RESPONSE < <(curl -s "https://api.github.com/repos/REandroid/APKEditor/releases/latest" | jq -r '.assets[0] | .browser_download_url, .size' 2> /dev/null)
+        readarray -t RESPONSE < <(curl -s "https://api.github.com/repos/REAndroid/APKEditor/releases/latest" | jq -r '.assets[0] | .browser_download_url, .size' 2> /dev/null)
         [ "${#RESPONSE[@]}" -eq 0 ] && return 1
-        
-        if command -v aria2c &> /dev/null; then
-            echo "Using aria2c for faster download"
-            aria2c "${ARIA_OPTS[@]}" -d "$(dirname "$APK_EDITOR")" -o "$(basename "$APK_EDITOR")" "${RESPONSE[0]}"
-        else
-            echo "Using wget (aria2c not available)"
-            wget -q --show-progress "${RESPONSE[0]}" -O "$APK_EDITOR"
-        fi
-        
+        wget -q --show-progress "${RESPONSE[0]}" -O "$APK_EDITOR"
         if [ "${RESPONSE[1]}" == "$(stat -c %s "$APK_EDITOR" 2> /dev/null)" ]; then
             break
         else
-            rm -f "$APK_EDITOR"
+            rm "$APK_EDITOR"
         fi
         ((CTR++))
     done
