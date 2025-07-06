@@ -1,9 +1,17 @@
 changelog:
-  categories:
-    - title: 🏕 Features
-      labels:
-    - features
-    - title: 👒 Dependencies
-      labels:
-        - dependencies
+ categories:
+ - title: Features
+   labels:
+  - sevemver
+  - sement
+ - title: Bug Fix
+   labels:
+  - bug
+ - title: Misc Changes
+   labels:
+  - "*"
+   
+ 
+  
+   
 
