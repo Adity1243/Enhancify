@@ -1,13 +1,8 @@
-# .github/release.yml
-
 changelog:
   categories:
     - title: 🏕 Features
       labels:
-        - gsgs
-      exclude:
-        labels:
-          - dependencies
+    - features
     - title: 👒 Dependencies
       labels:
         - dependencies
