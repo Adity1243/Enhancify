@@ -1,1 +1,5 @@
-jejs
+changelog:
+  exclude:
+    labels: 
+    categories:
+    title: "🚀 New Features"
