@@ -34,7 +34,7 @@ termux-setup-storage
 
 copy code:
 
-[🚀 Run Enhancify installer](termux://bash?command=git%20clone%20https%3A%2F%2Fgithub.com%2FGraywizard888%2FEnhancify.git%20%26%26%20cd%20Enhancify%20%26%26%20bash%20install.sh)
+(termux://bash?command=git%20clone%20https%3A%2F%2Fgithub.com%2FGraywizard888%2FEnhancify.git%20%26%26%20cd%20Enhancify%20%26%26%20bash%20install.sh)
 
 run with enhancify later
 ____________________________________
