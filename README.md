@@ -5,8 +5,10 @@
 
 [![Telegram Channel](https://img.shields.io/badge/Telegram_Discussion-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/Graywizard_projects)
 ![GitHub Repo stars](https://img.shields.io/github/stars/Graywizard888/Enhancify?style=for-the-badge&color=yellow)
+
 <a href="https://github.com/termux/termux-app">
-    <img src="https://raw.githubusercontent.com/Graywizard888/Enhancify/main/Icons/Termux.png" alt="Termux" width="100">
+    <img src="https://raw.githubusercontent.com/Graywizard888/Enhancify/main/Icons/Termux.png" width="100px">
+</a>
 
 ---
 
